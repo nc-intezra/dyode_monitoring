@@ -1,0 +1,48 @@
+# HELP dyode_info DYODE version and transport hash of each box (1 when known).
+# TYPE dyode_info gauge
+dyode_info{side="in",version="2.1.0",transport_hash="ea54ffbf38d4",config="loopback test"} 1
+dyode_info{side="out",version="2.1.0",transport_hash="ea54ffbf38d4",config="loopback test"} 1
+# HELP dyode_status_age_seconds Seconds since this box's status was taken; for the input box, as seen by the output box.
+# TYPE dyode_status_age_seconds gauge
+dyode_status_age_seconds{side="in"} 0.6
+dyode_status_age_seconds{side="out"} 0
+# HELP dyode_status_received 1 when the box's status is known, 0 when the output box has never heard from the input box.
+# TYPE dyode_status_received gauge
+dyode_status_received{side="in"} 1
+dyode_status_received{side="out"} 1
+# HELP dyode_uptime_seconds Seconds since DYODE started on the box.
+# TYPE dyode_uptime_seconds gauge
+dyode_uptime_seconds{side="in"} 6
+dyode_uptime_seconds{side="out"} 7
+# HELP dyode_config_match 1 when both boxes run the same transport configuration.
+# TYPE dyode_config_match gauge
+dyode_config_match 1
+# HELP dyode_module_up 1 when the module is running, 0 while it restarts.
+# TYPE dyode_module_up gauge
+dyode_module_up{side="in",module="files",type="folder"} 1
+dyode_module_up{side="out",module="files",type="folder"} 1
+# HELP dyode_module_restarts_total Times the module stopped and was restarted.
+# TYPE dyode_module_restarts_total counter
+dyode_module_restarts_total{side="in",module="files"} 0
+dyode_module_restarts_total{side="out",module="files"} 0
+# HELP dyode_events_total transfer.jsonl events by module and event name.
+# TYPE dyode_events_total counter
+dyode_events_total{side="in",module="files",event="batch_sent"} 1
+dyode_events_total{side="in",module="files",event="file_sent"} 2
+dyode_events_total{side="out",module="files",event="batch_received"} 1
+dyode_events_total{side="out",module="files",event="file_stored"} 2
+dyode_events_total{side="out",module="files",event="manifest_received"} 1
+# HELP dyode_bytes_total File bytes sent (input box) or stored (output box).
+# TYPE dyode_bytes_total counter
+dyode_bytes_total{side="in",module="files",direction="sent"} 2000003
+dyode_bytes_total{side="out",module="files",direction="stored"} 2000003
+# HELP dyode_last_activity_timestamp_seconds Unix time of the module's last event.
+# TYPE dyode_last_activity_timestamp_seconds gauge
+dyode_last_activity_timestamp_seconds{side="in",module="files"} 1793160683.934
+dyode_last_activity_timestamp_seconds{side="out",module="files"} 1793160684.126
+# HELP dyode_free_bytes Free space under a module's folder.
+# TYPE dyode_free_bytes gauge
+dyode_free_bytes{side="in",module="files",dir="in"} 27251560448
+dyode_free_bytes{side="out",module="files",dir="out"} 27251556352
+# HELP dyode_counter_total Box-wide counters: lidi transfers aborted, API requests refused, and events without a module.
+# TYPE dyode_counter_total counter
