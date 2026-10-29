@@ -1,0 +1,17 @@
+# Add to prometheus.yml under scrape_configs.  The output box's API serves
+# both boxes; scrape the input box too only if your Prometheus is on the OT
+# side (it cannot reach the OT side from IT, and does not need to).
+scrape_configs:
+  - job_name: dyode
+    scheme: https
+    metrics_path: /metrics
+    scrape_interval: 15s
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/dyode.token   # from: sudo dyode api-token add prometheus
+    tls_config:
+      ca_file: /etc/prometheus/dyode-out.crt          # the output box's /etc/dyode/api.crt
+      # server_name: dyode-out                        # if you scrape by IP and the cert names a host
+    static_configs:
+      - targets: ["192.168.50.4:8443"]                # api.out.listen
+        labels: {diode: plant-a}

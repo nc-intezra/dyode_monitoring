@@ -1,0 +1,73 @@
+{
+  "boxes": {
+    "in": {
+      "config_name": "loopback test",
+      "counters": {},
+      "modules": [
+        {
+          "bytes_sent": 2000003,
+          "bytes_stored": 0,
+          "endpoint": 0,
+          "events": {
+            "batch_sent": 1,
+            "file_sent": 2
+          },
+          "free": [
+            {
+              "dir": "in",
+              "free_bytes": 27251560448,
+              "path": "/srv/dyode/in"
+            }
+          ],
+          "last_activity": "2026-10-28T04:11:23.934Z",
+          "name": "files",
+          "restarts": 0,
+          "state": "running",
+          "type": "folder"
+        }
+      ],
+      "received": "2026-10-28T04:11:28.075Z",
+      "side": "in",
+      "status_age_s": 0.6,
+      "time": "2026-10-28T04:11:28.027Z",
+      "transport_hash": "ea54ffbf38d4",
+      "uptime_s": 6,
+      "version": "2.1.0"
+    },
+    "out": {
+      "config_name": "loopback test",
+      "counters": {},
+      "modules": [
+        {
+          "bytes_sent": 0,
+          "bytes_stored": 2000003,
+          "endpoint": 0,
+          "events": {
+            "batch_received": 1,
+            "file_stored": 2,
+            "manifest_received": 1
+          },
+          "free": [
+            {
+              "dir": "out",
+              "free_bytes": 27251552256,
+              "path": "/srv/dyode/out"
+            }
+          ],
+          "last_activity": "2026-10-28T04:11:24.126Z",
+          "name": "files",
+          "restarts": 0,
+          "state": "running",
+          "type": "folder"
+        }
+      ],
+      "side": "out",
+      "status_age_s": 0,
+      "time": "2026-10-28T04:11:28.692Z",
+      "transport_hash": "ea54ffbf38d4",
+      "uptime_s": 7,
+      "version": "2.1.0"
+    }
+  },
+  "warnings": []
+}

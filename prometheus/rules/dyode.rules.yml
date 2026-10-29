@@ -1,0 +1,109 @@
+# Alert rules for DYODE 2.1.0+ (nc-intezra/dyode_rust, docs/API.md).
+# Scrape the OUTPUT box's /metrics: it reports both boxes (side="in" from
+# the status the input box sends through the diode).  Every series carries
+# side="in" or side="out"; module names are the ones in config.yaml.
+groups:
+  - name: dyode
+    rules:
+      # ---- the link -----------------------------------------------------
+      - alert: DyodeOutputBoxDown
+        expr: up{job="dyode"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "DYODE output box {{ $labels.instance }} is not answering"
+          description: "Prometheus cannot scrape the output box's API: DYODE stopped, the box is down, or the token/certificate changed."
+
+      - alert: DyodeInputSilent
+        expr: dyode_status_age_seconds{side="in"} > 30 or dyode_status_received{side="in"} == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "No status from the DYODE input box (seen from {{ $labels.instance }})"
+          description: "The input box's status message has not arrived for over 30 s. The input box, its diode NIC, the diode, or the output box's receiver has failed; nothing is crossing."
+
+      - alert: DyodeConfigMismatch
+        expr: dyode_config_match == 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "The two DYODE boxes run different configurations"
+          description: "Their transport hashes differ: lidi parameters or modules are not the same on both boxes, so some traffic is refused. Copy the same config.yaml to both."
+
+      - alert: DyodeTransfersAborted
+        expr: increase(dyode_counter_total{side="out",counter="lidi_transfers_aborted"}[15m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "lidi aborted {{ $value | humanize }} transfer(s) in 15 min"
+          description: "Blocks were lost in the diode (lossy link, receiver too slow, or max_mbps too high). Lost files are named in file_missing events; re-send them from .dyode_sent on the input box."
+
+      - alert: DyodeStaticArpMissing
+        expr: dyode_static_arp_ok == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "The input box's static ARP entry is missing"
+          description: "Without it the input box's own kernel drops everything sent to the output box."
+
+      # ---- modules -------------------------------------------------------
+      - alert: DyodeModuleDown
+        expr: dyode_module_up == 0
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "DYODE module {{ $labels.module }} ({{ $labels.side }} box) keeps restarting"
+
+      - alert: DyodeModuleFlapping
+        expr: increase(dyode_module_restarts_total[30m]) > 3
+        labels: {severity: warning}
+        annotations:
+          summary: "DYODE module {{ $labels.module }} ({{ $labels.side }} box) restarted {{ $value | humanize }} times in 30 min"
+
+      # ---- files ---------------------------------------------------------
+      - alert: DyodeFilesRejected
+        expr: increase(dyode_events_total{side="out",event="file_rejected"}[15m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $value | humanize }} file(s) rejected by the output box ({{ $labels.module }})"
+          description: "Incomplete, or not signed with the shared key. See file_rejected records in transfer.jsonl on the output box."
+
+      - alert: DyodeFilesMissing
+        expr: increase(dyode_events_total{side="out",event="file_missing"}[30m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $value | humanize }} file(s) of a batch never arrived ({{ $labels.module }})"
+          description: "Re-send them by copying them back from .dyode_sent on the input box."
+
+      - alert: DyodeSendFailures
+        expr: increase(dyode_events_total{side="in",event="file_failed"}[15m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "The input box failed to send {{ $value | humanize }} file(s) ({{ $labels.module }})"
+
+      - alert: DyodeDiskLow
+        expr: dyode_free_bytes < 5e9
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Under 5 GB free in {{ $labels.module }}'s {{ $labels.dir }} folder ({{ $labels.side }} box)"
+
+      # ---- logs ----------------------------------------------------------
+      - alert: DyodeLogsStale
+        expr: increase(dyode_events_total{side="out",event="logs_stale"}[15m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "Log stream {{ $labels.module }} went quiet (no heartbeat)"
+
+      - alert: DyodeLogsGap
+        expr: increase(dyode_events_total{side="out",event="logs_gap"}[15m]) > 0
+        labels: {severity: info}
+        annotations:
+          summary: "Log lines were lost in the diode ({{ $labels.module }})"
+
+      # ---- the API itself --------------------------------------------------
+      - alert: DyodeApiRefusals
+        expr: increase(dyode_counter_total{counter="api_refused"}[10m]) > 20
+        labels: {severity: info}
+        annotations:
+          summary: "{{ $value | humanize }} refused API requests on the {{ $labels.side }} box in 10 min"
+          description: "A client with a wrong or revoked token, or someone probing. See api_refused records in transfer.jsonl."
